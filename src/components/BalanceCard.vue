@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-4">
       <span class="text-sm font-medium text-gray-400 uppercase tracking-wider">Portfolio</span>
       <button
-        class="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40"
+        class="p-1.5 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-40"
         :disabled="isLoading"
         @click="refresh"
         aria-label="Refresh balances"
@@ -65,7 +65,7 @@
         <div
           v-for="token in tokenRows"
           :key="token.address"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors"
+          class="flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-xl hover:bg-white/5 transition-colors"
         >
           <div
             class="h-9 w-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"

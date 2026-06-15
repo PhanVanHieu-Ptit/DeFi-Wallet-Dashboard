@@ -5,7 +5,7 @@
       <h2 class="text-lg font-semibold text-white">Transaction History</h2>
       <RouterLink
         to="/"
-        class="text-sm text-gray-400 hover:text-white transition-colors"
+        class="flex items-center min-h-11 px-1 text-sm text-gray-400 hover:text-white transition-colors"
       >
         ← Back
       </RouterLink>
@@ -16,7 +16,7 @@
       <button
         v-for="tab in TABS"
         :key="tab.value"
-        class="flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+        class="flex-1 px-3 py-2 min-h-11 rounded-lg text-sm font-medium transition-colors"
         :class="activeTab === tab.value
           ? 'bg-gray-700 text-white'
           : 'text-gray-400 hover:text-gray-200'"
@@ -87,7 +87,7 @@
             :href="etherscanUrl(tx.hash)"
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 text-sm font-mono text-indigo-400 hover:text-indigo-300 transition-colors"
+            class="inline-flex items-center gap-1 max-w-full text-sm font-mono text-indigo-400 hover:text-indigo-300 transition-colors"
             @click.stop
           >
             {{ truncateHash(tx.hash) }}
@@ -120,7 +120,7 @@
     <!-- Load more -->
     <button
       v-if="txList.length"
-      class="mt-4 w-full py-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-40"
+      class="mt-4 w-full py-2.5 min-h-11 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm font-medium transition-colors disabled:opacity-40"
       :disabled="loading"
       @click="fetchMore"
     >

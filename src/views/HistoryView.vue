@@ -1,5 +1,5 @@
 <template>
-  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start pt-12 px-4 pb-12">
+  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-start pt-12 px-4 pb-20 sm:pb-12">
     <TxHistory />
   </main>
 </template>
