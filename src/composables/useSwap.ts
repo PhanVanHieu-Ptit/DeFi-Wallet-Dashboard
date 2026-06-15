@@ -1,8 +1,10 @@
 import { ref } from 'vue'
 import { BrowserProvider } from 'ethers'
 import { useWalletStore } from '@/stores/walletStore'
+import { showToast, ToastHandledError } from '@/composables/useToast'
 
 const BASE_URL = import.meta.env.VITE_1INCH_API_URL ?? 'https://api.1inch.io/v5.0'
+const API_TIMEOUT_MS = 10_000
 
 interface SwapTokenInfo {
   address: string
@@ -43,14 +45,30 @@ async function call1inch(
   const apiKey = import.meta.env.VITE_1INCH_API_KEY
   if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`
 
-  const res = await fetch(`${BASE_URL}/${chainId}/${path}?${query}`, { headers })
-  const data = await res.json()
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-  if (!res.ok) {
-    throw new Error((data as { description?: string }).description ?? `1inch HTTP ${res.status}`)
+  try {
+    const res = await fetch(`${BASE_URL}/${chainId}/${path}?${query}`, {
+      headers,
+      signal: controller.signal,
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw new Error((data as { description?: string }).description ?? `1inch HTTP ${res.status}`)
+    }
+
+    return data as Record<string, unknown>
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      showToast('1inch API request timed out (>10s)', 'warning')
+      throw new ToastHandledError('API request timed out')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
   }
-
-  return data as Record<string, unknown>
 }
 
 export function useSwap() {
@@ -129,14 +147,25 @@ export function useSwap() {
       const provider = new BrowserProvider((window as any).ethereum)
       const signer = await provider.getSigner()
 
-      const txResponse = await signer.sendTransaction({
-        to: tx.to,
-        data: tx.data,
-        value: BigInt(tx.value),
-        gasLimit: BigInt(tx.gas),
-      })
-
-      return txResponse.hash
+      try {
+        const txResponse = await signer.sendTransaction({
+          to: tx.to,
+          data: tx.data,
+          value: BigInt(tx.value),
+          gasLimit: BigInt(tx.gas),
+        })
+        return txResponse.hash
+      } catch (txErr: any) {
+        if (txErr?.code === 4001 || txErr?.code === 'ACTION_REJECTED') {
+          showToast('Transaction rejected by user', 'warning')
+        } else {
+          showToast(
+            txErr instanceof Error ? `Transaction failed: ${txErr.message}` : 'Transaction failed',
+            'error',
+          )
+        }
+        throw new ToastHandledError(txErr?.message ?? 'Transaction failed')
+      }
     } finally {
       loading.value = false
     }

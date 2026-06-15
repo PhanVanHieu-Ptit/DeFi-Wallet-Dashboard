@@ -1,7 +1,9 @@
 import { ref, watch } from 'vue'
 import { useWalletStore } from '@/stores/walletStore'
+import { showToast, ToastHandledError } from '@/composables/useToast'
 
 const ALCHEMY_URL = `https://eth-mainnet.g.alchemy.com/v2/${import.meta.env.VITE_ALCHEMY_KEY}`
+const API_TIMEOUT_MS = 10_000
 
 export interface Transaction {
   hash: string
@@ -28,20 +30,35 @@ interface AlchemyResult {
 }
 
 async function callAlchemy(params: Record<string, unknown>): Promise<AlchemyResult> {
-  const res = await fetch(ALCHEMY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'alchemy_getAssetTransfers',
-      params: [params],
-    }),
-  })
-  if (!res.ok) throw new Error(`Alchemy HTTP ${res.status}`)
-  const data = await res.json()
-  if (data.error) throw new Error(data.error.message)
-  return data.result as AlchemyResult
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+
+  try {
+    const res = await fetch(ALCHEMY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'alchemy_getAssetTransfers',
+        params: [params],
+      }),
+      signal: controller.signal,
+    })
+
+    if (!res.ok) throw new Error(`Alchemy HTTP ${res.status}`)
+    const data = await res.json()
+    if (data.error) throw new Error(data.error.message)
+    return data.result as AlchemyResult
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      showToast('Transaction history request timed out (>10s)', 'warning')
+      throw new ToastHandledError('API request timed out')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 function parseTransfer(raw: AlchemyTransfer, walletAddress: string): Transaction {
@@ -107,6 +124,13 @@ export function useTransactions() {
       } else {
         const existing = new Set(txList.value.map(t => t.hash))
         txList.value = [...txList.value, ...deduped.filter(t => !existing.has(t.hash))]
+      }
+    } catch (err) {
+      if (!(err instanceof ToastHandledError)) {
+        showToast(
+          err instanceof Error ? err.message : 'Failed to load transactions',
+          'error',
+        )
       }
     } finally {
       loading.value = false
