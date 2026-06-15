@@ -288,7 +288,7 @@ import { BrowserProvider } from 'ethers'
 import { useSwap } from '@/composables/useSwap'
 import { useTokenPrice } from '@/composables/useTokenPrice'
 import { useWalletStore } from '@/stores/walletStore'
-import { useToast } from '@/composables/useToast'
+import { useToast, ToastHandledError } from '@/composables/useToast'
 
 interface Token {
   symbol: string
@@ -391,7 +391,9 @@ async function fetchQuote() {
     await getQuote(fromToken.value.address, toToken.value.address, raw, slippage.value)
     await fetchGasPrice()
   } catch (err) {
-    show(err instanceof Error ? err.message : String(err), 'error')
+    if (!(err instanceof ToastHandledError)) {
+      show(err instanceof Error ? err.message : String(err), 'error')
+    }
   }
 }
 
@@ -443,7 +445,9 @@ async function handleSwap() {
     txHash.value = hash
     show('Swap submitted!', 'success')
   } catch (err) {
-    show(err instanceof Error ? err.message : String(err), 'error')
+    if (!(err instanceof ToastHandledError)) {
+      show(err instanceof Error ? err.message : String(err), 'error')
+    }
   } finally {
     txPending.value = false
   }

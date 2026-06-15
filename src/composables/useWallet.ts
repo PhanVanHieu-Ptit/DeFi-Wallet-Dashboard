@@ -1,5 +1,8 @@
 import { BrowserProvider } from 'ethers'
 import { useWalletStore } from '@/stores/walletStore'
+import { showToast } from '@/composables/useToast'
+
+const SUPPORTED_CHAINS = new Set([1, 11155111])
 
 // Module-level singletons so listeners are only registered once per session.
 let provider: BrowserProvider | null = null
@@ -14,6 +17,12 @@ function getEthereum(): any {
 function getProvider(): BrowserProvider {
   if (!provider) provider = new BrowserProvider(getEthereum())
   return provider
+}
+
+function warnIfUnsupported(chainId: number): void {
+  if (!SUPPORTED_CHAINS.has(chainId)) {
+    showToast('Unsupported network. Please switch to Ethereum mainnet or Sepolia.', 'warning')
+  }
 }
 
 function attachListeners(): void {
@@ -32,7 +41,9 @@ function attachListeners(): void {
   eth.on('chainChanged', (hexChainId: string) => {
     // Provider must be recreated after a chain change.
     provider = null
-    store.chainId = parseInt(hexChainId, 16)
+    const newChainId = parseInt(hexChainId, 16)
+    store.chainId = newChainId
+    warnIfUnsupported(newChainId)
   })
 
   listenersAttached = true
@@ -48,11 +59,16 @@ export async function connect(): Promise<void> {
     if (!accounts.length) throw new Error('No accounts returned by wallet.')
 
     const network = await p.getNetwork()
-    store.setWallet(accounts[0], Number(network.chainId))
+    const chainId = Number(network.chainId)
+    store.setWallet(accounts[0], chainId)
 
+    warnIfUnsupported(chainId)
     attachListeners()
-  } catch (err) {
+  } catch (err: any) {
     store.reset()
+    if (err?.code === 4001) {
+      showToast('Wallet connection rejected', 'error')
+    }
     throw err
   }
 }

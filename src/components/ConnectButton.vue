@@ -4,7 +4,7 @@
     <button
       v-if="status === 'disconnected'"
       class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-sm font-semibold transition-colors"
-      @click="connect"
+      @click="handleConnect"
     >
       Connect Wallet
     </button>
@@ -91,6 +91,10 @@ const { show } = useToast()
 
 const open = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+
+async function handleConnect() {
+  try { await connect() } catch { /* toast already shown by useWallet */ }
+}
 
 function onDocumentClick(e: MouseEvent) {
   if (containerRef.value && !containerRef.value.contains(e.target as Node)) {
