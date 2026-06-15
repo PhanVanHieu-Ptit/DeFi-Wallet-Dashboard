@@ -4,7 +4,7 @@
 
     <div v-if="wallet.isConnected" class="text-center">
       <p class="text-gray-400 text-sm mb-1">Connected wallet</p>
-      <p class="font-mono text-emerald-400 text-sm">{{ wallet.address }}</p>
+      <p class="font-mono text-emerald-400 text-sm">{{ wallet.shortAddress }}</p>
       <button
         class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors"
         @click="disconnect"
@@ -13,13 +13,29 @@
       </button>
     </div>
 
-    <button
-      v-else
-      class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold transition-colors"
-      @click="connect"
-    >
-      Connect Wallet
-    </button>
+    <div v-else class="flex flex-col items-center gap-2">
+      <template v-if="hasWallet">
+        <button
+          class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold transition-colors disabled:opacity-50"
+          :disabled="wallet.status === 'connecting'"
+          @click="handleConnect"
+        >
+          {{ wallet.status === 'connecting' ? 'Connecting…' : 'Connect Wallet' }}
+        </button>
+        <p v-if="connectError" class="text-red-400 text-sm">{{ connectError }}</p>
+      </template>
+      <template v-else>
+        <p class="text-gray-400 text-sm">No Web3 wallet detected.</p>
+        <a
+          href="https://metamask.io/download/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-semibold transition-colors"
+        >
+          Install MetaMask
+        </a>
+      </template>
+    </div>
 
     <nav v-if="wallet.isConnected" class="flex gap-4">
       <RouterLink
@@ -39,21 +55,27 @@
 </template>
 
 <script setup lang="ts">
-import { useWalletStore } from '@/stores/wallet'
+import { ref, onMounted } from 'vue'
+import { useWallet } from '@/composables/useWallet'
+import { useWalletStore } from '@/stores/walletStore'
 
 const wallet = useWalletStore()
+const { connect, disconnect } = useWallet()
 
-async function connect() {
-  const provider = (window as any).ethereum
-  if (!provider) {
-    alert('No wallet detected. Install MetaMask or another Web3 wallet.')
-    return
+const hasWallet = ref(false)
+const connectError = ref<string | null>(null)
+
+onMounted(() => {
+  // Some wallets inject window.ethereum after DOMContentLoaded, so check once mounted.
+  hasWallet.value = !!(window as any).ethereum
+})
+
+async function handleConnect() {
+  connectError.value = null
+  try {
+    await connect()
+  } catch (err: any) {
+    connectError.value = err?.message ?? 'Failed to connect wallet.'
   }
-  const [addr] = await provider.request({ method: 'eth_requestAccounts' })
-  wallet.setAddress(addr)
-}
-
-function disconnect() {
-  wallet.setAddress(null)
 }
 </script>
