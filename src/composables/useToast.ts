@@ -1,4 +1,4 @@
-import { inject, provide, reactive, type InjectionKey } from 'vue'
+import { inject, provide, reactive, getCurrentInstance, type InjectionKey } from 'vue'
 
 export type ToastType = 'info' | 'success' | 'warning' | 'error'
 
@@ -43,6 +43,7 @@ export function provideToast(): void {
 
 /** Use inside component setup — injects the provided API, falls back to the singleton. */
 export function useToast(): ToastAPI {
+  if (!getCurrentInstance()) return _api
   return inject(ToastKey, _api)
 }
 
