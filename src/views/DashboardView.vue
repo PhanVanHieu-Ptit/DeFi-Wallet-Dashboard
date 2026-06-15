@@ -1,16 +1,19 @@
 <template>
-  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6">
+  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
     <h1 class="text-3xl font-bold">DeFi Wallet Dashboard</h1>
 
-    <div v-if="wallet.isConnected" class="text-center">
-      <p class="text-gray-400 text-sm mb-1">Connected wallet</p>
-      <p class="font-mono text-emerald-400 text-sm">{{ wallet.shortAddress }}</p>
-      <button
-        class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors"
-        @click="disconnect"
-      >
-        Disconnect
-      </button>
+    <div v-if="wallet.isConnected" class="flex flex-col items-center gap-4 w-full max-w-md">
+      <div class="text-center">
+        <p class="text-gray-400 text-sm mb-1">Connected wallet</p>
+        <p class="font-mono text-emerald-400 text-sm">{{ wallet.shortAddress }}</p>
+        <button
+          class="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors"
+          @click="disconnect"
+        >
+          Disconnect
+        </button>
+      </div>
+      <BalanceCard />
     </div>
 
     <div v-else class="flex flex-col items-center gap-2">
@@ -58,6 +61,7 @@
 import { ref, onMounted } from 'vue'
 import { useWallet } from '@/composables/useWallet'
 import { useWalletStore } from '@/stores/walletStore'
+import BalanceCard from '@/components/BalanceCard.vue'
 
 const wallet = useWalletStore()
 const { connect, disconnect } = useWallet()

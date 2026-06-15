@@ -18,11 +18,12 @@ export function useTokenPrice() {
   const prices = ref<PriceMap>({ ethereum: 0, 'usd-coin': 0, tether: 0 })
   const priceChange24h = ref<PriceMap>({ ethereum: 0, 'usd-coin': 0, tether: 0 })
   const loading = ref(false)
+  let hasFetched = false
 
   let intervalId: ReturnType<typeof setInterval> | null = null
 
   async function fetchPrices(): Promise<void> {
-    loading.value = true
+    if (!hasFetched) loading.value = true
     try {
       const url = `${BASE_URL}/simple/price?ids=${TOKEN_IDS}&vs_currencies=usd&include_24hr_change=true`
       const res = await fetch(url)
@@ -40,7 +41,10 @@ export function useTokenPrice() {
     } catch {
       // Silently keep the last successfully cached values
     } finally {
-      loading.value = false
+      if (!hasFetched) {
+        loading.value = false
+        hasFetched = true
+      }
     }
   }
 
