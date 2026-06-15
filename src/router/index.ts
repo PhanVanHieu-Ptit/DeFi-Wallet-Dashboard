@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '@/views/DashboardView.vue'
-import { useWalletStore } from '@/stores/wallet'
+import { useWalletStore } from '@/stores/walletStore'
 import { useToast } from '@/composables/useToast'
 
 const router = createRouter({
