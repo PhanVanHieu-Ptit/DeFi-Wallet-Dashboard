@@ -13,4 +13,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      '/api/1inch': {
+        target: 'https://api.1inch.dev',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/1inch/, '/swap/v6.0'),
+      },
+    },
+  },
 })

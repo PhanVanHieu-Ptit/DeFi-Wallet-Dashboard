@@ -2,7 +2,7 @@ import { BrowserProvider } from 'ethers'
 import { useWalletStore } from '@/stores/walletStore'
 import { showToast } from '@/composables/useToast'
 
-const SUPPORTED_CHAINS = new Set([1, 11155111])
+const SUPPORTED_CHAINS = new Set([1, 11155111, 137, 56, 42161, 31337])
 
 // Module-level singletons so listeners are only registered once per session.
 let provider: BrowserProvider | null = null

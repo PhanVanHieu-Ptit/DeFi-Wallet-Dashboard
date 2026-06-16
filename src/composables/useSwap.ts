@@ -3,7 +3,7 @@ import { BrowserProvider } from 'ethers'
 import { useWalletStore } from '@/stores/walletStore'
 import { showToast, ToastHandledError } from '@/composables/useToast'
 
-const BASE_URL = import.meta.env.VITE_1INCH_API_URL ?? 'https://api.1inch.io/v5.0'
+const BASE_URL = import.meta.env.VITE_1INCH_API_URL ?? '/api/1inch'
 const API_TIMEOUT_MS = 10_000
 
 interface SwapTokenInfo {

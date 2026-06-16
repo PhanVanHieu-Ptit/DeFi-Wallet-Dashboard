@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(npm create *)",
-      "Bash(npx vue-tsc *)"
+      "Bash(npx vue-tsc *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(node -e \"const p = require\\('playwright'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e \"const p = require\\('puppeteer'\\); console.log\\('ok'\\)\")",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --screenshot=/tmp/dashboard.png --window-size=1280,900 --no-sandbox --disable-gpu http://localhost:5173)",
+      "Bash(echo \"exit: $?\")",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless=new --screenshot=/tmp/dashboard2.png --window-size=1280,900 --no-sandbox --disable-gpu --virtual-time-budget=5000 http://localhost:5173)",
+      "Bash(ps -p 14773 -o pid,lstart,command)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\nURL: %{url_effective}\\\\n\" \"http://localhost:5173/api/1inch/59144/quote?fromTokenAddress=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee&toTokenAddress=0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34&amount=1000000000000000000\")"
     ]
   }
 }
