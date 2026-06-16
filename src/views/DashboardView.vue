@@ -1,5 +1,5 @@
 <template>
-  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center gap-6 px-4">
+  <main class="min-h-screen bg-gray-950 text-white flex flex-col items-center py-10 gap-6 px-4">
     <h1 class="text-3xl font-bold">DeFi Wallet Dashboard</h1>
 
     <div v-if="wallet.isConnected" class="flex flex-col items-center gap-4 w-full max-w-md">
@@ -54,6 +54,11 @@
         History
       </RouterLink>
     </nav>
+
+    <!-- Price table always visible -->
+    <div class="w-full max-w-md">
+      <PriceTable />
+    </div>
   </main>
 </template>
 
@@ -62,6 +67,7 @@ import { ref, onMounted } from 'vue'
 import { useWallet } from '@/composables/useWallet'
 import { useWalletStore } from '@/stores/walletStore'
 import BalanceCard from '@/components/BalanceCard.vue'
+import PriceTable from '@/components/PriceTable.vue'
 
 const wallet = useWalletStore()
 const { connect, disconnect } = useWallet()
